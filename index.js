@@ -2,22 +2,37 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv").config();
 const cors = require("cors");
-
-//importing database connnetion
-
-const connection = require("./utils/db");
-
-//importing routes
-const roomRoute = require("./routes/room");
+const Pusher = require("pusher");
 
 app.use(express.json());
-app.use("/api/room", roomRoute);
 
+// Pusher Configuration
+const pusher = new Pusher({
+  appId: process.env.APP_ID,
+  key: process.env.KEY,
+  secret: process.env.SECRET,
+  cluster: process.env.CLUSTER,
+  useTLS: true,
+});
+
+//importing database connnetion
+const connection = require("./utils/db");
 //DB connection
 connection();
 
+//importing routes
+const roomRoute = require("./routes/room");
+const messageRoute = require("./routes/message");
+
 //Access Control Allow Origin
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+
+app.use("/api/room", roomRoute);
+app.use("/api/messages", messageRoute);
 
 app.get("/", (req, res) => {
   res.send("hello");
